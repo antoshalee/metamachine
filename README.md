@@ -1,4 +1,4 @@
-## DIY SM
+## Metamachine
 
 It uses the similar DSL as most of ruby state machine do. The only thing what we don't do: we don't change a state itself.
 
@@ -16,17 +16,17 @@ Our job is just a validation of initial state and making sure that you eventuall
 
 ## Setup
 
-1. Include `DIYSM` module into your class.
-2. Pass the state reader to `diy_sm` call. We don't write a state but we definitely have to read it in order to validate it for you.
+1. Include `Metamachine` module into your class.
+2. Pass the state reader to `metamachine` call. We don't write a state but we definitely have to read it in order to validate it for you.
 3. Define states, events and transitions using DSL
-4. Implement method `handle_sm_event`. Inside this method you must call `event#transition`.
+4. Implement method `handle_metamachine_event`. Inside this method you must call `event#transition`.
 
 
 ```ruby
 class Post
-  include DIYSM
+  include Metamachine
 
-  diy_sm(:status) do
+  metamachine(:status) do
     state :draft, :published
 
     event :publish do
@@ -38,7 +38,7 @@ class Post
     end
   end
 
-  def handle_sm_event(event)
+  def handle_metamachine_event(event)
     # Minimal implementation to make transitions work
     event.transition do
       self.status = event.expected_state
@@ -54,7 +54,7 @@ Such approach allows you to use database transaction and rollback them. Take a l
 
 ```ruby
 
-def handle_sm_event(event)
+def handle_metamachine_event(event)
   "Transitions::#{event.to_s.camelize}".constantize.call(event)
 end
 
@@ -87,7 +87,7 @@ post.request(author: user)
 
 ```ruby
 event.to_s            # => 'publish'
-event.object          # => #<Post>
+event.target          # => #<Post>
 event.params          # => { author: #<User> }
 event.initial_state   # => 'draft'
 event.expected_state  # => 'published'
