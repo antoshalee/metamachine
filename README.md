@@ -2,7 +2,7 @@
 
 It uses the similar DSL as most of ruby state machine do. The only thing what we don't do: we don't change a state itself.
 
-### WAT?
+### What?
 The main idea behind this is to provide maximum of flexibility. There is a billion ways to change a state.
 You can persist or not persist, use database transactions, send emails before or after, write logs etc.
 Usually state machine libraries perform state transition and provide callbacks for you. We avoid callbacks at all.
@@ -19,7 +19,7 @@ Our job is just a validation of initial state and making sure that you eventuall
 1. Include `Metamachine` module into your class.
 2. Pass the state reader to `metamachine` call. We don't write a state but we definitely have to read it in order to validate it for you.
 3. Define states, events and transitions using DSL
-4. Implement method `handle_metamachine_event`. Inside this method you must call `event#transition`.
+4. Implement your own runner. Inside `run` block you must change an object state.
 
 
 ```ruby
@@ -36,38 +36,38 @@ class Post
     event :archive do
       transition from: :published, to: :archived
     end
-  end
 
-  def handle_metamachine_event(event)
     # Minimal implementation to make transitions work
-    event.transition do
-      self.status = event.expected_state
+    run do |transition, object|
+      object.status = transition.state_to
     end
   end
 end
 ```
 
-This is how we execute a contract. You call `#transition` and change a state inside a block.
-In the end of block, new state will be validated, and exception will be raised if you did that improperly.
+This is how we execute a contract. You define `run` block and change a state explicitly inside.
+After block execution, new state will be validated, and exception will be raised if you did that improperly.
 
-Such approach allows you to use database transaction and rollback them. Take a look on a more complex example below. Here we delegate transition execution to service objects.
+You also able to pre-validate result by your own inside a block. This allows you to rollback transactions. Take a look on a more complex example below. Here we delegate transition execution to service objects.
 
 ```ruby
 
-def handle_metamachine_event(event)
-  "Transitions::#{event.to_s.camelize}".constantize.call(event)
+# Define runner
+run do |transition, object|
+  "Transitions::#{transition.event.camelize}".constantize.call(transition)
 end
 
 # Implementation of specific transition
 class Transitions::Publish do
   class << self
-    def call(event)
-      post = event.object
+    def call(transition)
+      post = transition.object
 
       ActiveRecord::Base.transaction do
-        event.transition do
-          post.update!(status: 'published', published_at: Time.now)
-        end
+        post.update!(status: 'published', published_at: Time.now)
+
+        # Pre-validate this to be able to rollback transaction
+        transition.validate_result!
 
         do_other_stuff_within_transaction
       end
@@ -83,13 +83,13 @@ post.request(author: user)
 
 ```
 
-## Inspect event
+## Inspect transition
 
 ```ruby
-event.to_s            # => 'publish'
-event.target          # => #<Post>
-event.params          # => { author: #<User> }
-event.initial_state   # => 'draft'
-event.expected_state  # => 'published'
+transition.event       # => 'publish'
+transition.target      # => #<Post>
+transition.params      # => { author: #<User> }
+transition.state_from  # => 'draft'
+transition.state_to    # => 'published'
 ```
 

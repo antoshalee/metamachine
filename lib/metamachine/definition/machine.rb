@@ -3,7 +3,8 @@ module Metamachine
     class Machine
       attr_reader :states,
                   :events,
-                  :state_reader
+                  :state_reader,
+                  :runner
 
       def initialize(klass, state_reader, &block)
         @klass = klass
@@ -14,10 +15,12 @@ module Metamachine
         instance_eval(&block) if block_given?
       end
 
+      # DSL: states definition
       def state(*states)
         @states += states.map(&:to_s)
       end
 
+      # DSL: event definition
       def event(name, &block)
         name = name.to_s
 
@@ -28,6 +31,11 @@ module Metamachine
         @events[name] = evt
 
         Monkeypatcher.call(@klass, name)
+      end
+
+      # DSL: runner definition
+      def run(&block)
+        @runner = Proc.new(&block)
       end
 
       def expected_state_for(event, state)

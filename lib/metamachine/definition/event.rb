@@ -11,10 +11,7 @@ module Metamachine
       end
 
       def transition(from:, to:)
-        from = Array(from)
-        to = to.to_s
-
-        from.each { |f| transitions[f.to_s] = to }
+        Array(from).each { |f| transitions[f.to_s] = to.to_s }
       end
     end
   end

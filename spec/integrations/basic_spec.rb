@@ -15,14 +15,12 @@ RSpec.describe 'success' do
         event :archive do
           transition from: %i[draft published], to: :archived
         end
-      end
 
-      def metamachine_run(transition)
-        transition.run do
-          self.status = transition.expected_state
+        run do |transition, obj|
+          obj.status = transition.state_to
 
-          if transition.expected_state == 'published'
-            self.author = transition.params[:author]
+          if transition.state_to == 'published'
+            obj.author = transition.params[:author]
           end
         end
       end
@@ -42,5 +40,15 @@ RSpec.describe 'success' do
     expect { post.archive }
       .to change(post, :status)
       .to('archived')
+  end
+
+  describe 'invalid state from' do
+    it 'fails' do
+      post = klass.new
+      post.status = 'archived'
+
+      expect { post.publish }
+        .to raise_error(Metamachine::InvalidTransitionInitialState)
+    end
   end
 end

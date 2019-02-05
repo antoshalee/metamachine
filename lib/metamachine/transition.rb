@@ -1,10 +1,8 @@
 module Metamachine
-  # Event that actually fired
-  # It is a different object than `Definition::Event`
   class Transition
     attr_reader :event,
-                :initial_state,
-                :expected_state,
+                :state_from,
+                :state_to,
                 :target,
                 :params
 
@@ -14,16 +12,28 @@ module Metamachine
       machine:,
       params:
     )
-      @event          = event.to_s
-      @target         = target
-      @machine        = machine
-      @params         = params
-      @initial_state  = target.send(machine.state_reader).to_s
-      @expected_state = machine.expected_state_for(event, initial_state)
+      @event      = event.to_s
+      @target     = target
+      @machine    = machine
+      @params     = params
+      @state_from = current_target_state
+      @state_to   = machine.expected_state_for(event, state_from)
     end
 
-    def run(&block)
+    def run(&_block)
       yield
+    end
+
+    def validate_result!
+      raise NotExpectedResultState if current_target_state != state_to
+    end
+
+    private
+
+    attr_reader :machine
+
+    def current_target_state
+      target.send(machine.state_reader).to_s
     end
   end
 end

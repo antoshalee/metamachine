@@ -5,8 +5,8 @@ module Metamachine
   require_relative 'metamachine/transition'
   require_relative 'metamachine/dispatch'
 
-  NotExpectedState              = Class.new(StandardError)
   InvalidTransitionInitialState = Class.new(StandardError)
+  NotExpectedResultState        = Class.new(StandardError)
 
   class << self
     def included(base)

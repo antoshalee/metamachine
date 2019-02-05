@@ -1,4 +1,4 @@
-RSpec.describe 'initial status validation' do
+RSpec.describe 'invalid runner' do
   let(:klass) do
     Class.new do
       attr_accessor :status, :author
@@ -11,17 +11,17 @@ RSpec.describe 'initial status validation' do
         event :publish do
           transition from: :draft, to: :published
         end
-      end
 
-      def metamachine_run(event); end
+        # Runner is doing nothing here which is obviously wrong
+        run {}
+      end
     end
   end
 
-  it 'works' do
+  it 'fails' do
     post = klass.new
-    post.status = 'archived'
+    post.status = 'draft'
 
-    expect { post.publish }
-      .to raise_error(Metamachine::InvalidTransitionInitialState)
+    expect { post.publish }.to raise_error(Metamachine::NotExpectedResultState)
   end
 end
