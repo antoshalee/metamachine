@@ -20,10 +20,6 @@ module Metamachine
       @state_to   = machine.expected_state_for(event, state_from)
     end
 
-    def run(&_block)
-      yield
-    end
-
     def validate_result!
       raise NotExpectedResultState if current_target_state != state_to
     end
