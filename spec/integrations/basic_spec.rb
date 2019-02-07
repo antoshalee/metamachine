@@ -16,11 +16,11 @@ RSpec.describe 'success' do
           transition from: %i[draft published], to: :archived
         end
 
-        run do |transition, obj|
-          obj.status = transition.state_to
+        run do |transition|
+          transition.target.status = transition.state_to
 
           if transition.state_to == 'published'
-            obj.author = transition.params[:author]
+            transition.target.author = transition.params[:author]
           end
         end
       end

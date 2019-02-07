@@ -22,7 +22,7 @@ module Metamachine
         params: params
       )
 
-      machine.runner.call(transition, target)
+      machine.runner.call(transition)
 
       transition.validate_result!
     end

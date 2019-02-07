@@ -12,8 +12,8 @@ RSpec.describe 'success' do
           transition from: :draft, to: :published
         end
 
-        run do |transition, obj|
-          obj.status = transition.state_to
+        run do |transition|
+          transition.target.status = transition.state_to
         end
       end
     end

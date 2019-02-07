@@ -38,8 +38,8 @@ class Post
     end
 
     # Minimal implementation to make transitions work
-    run do |transition, object|
-      object.status = transition.state_to
+    run do |transition|
+      transition.target.status = transition.state_to
     end
   end
 end
@@ -59,12 +59,14 @@ end
 
 # Implementation of specific transition
 class Transitions::Publish do
+  def initialize(transition)
+    @transition = transition
+  end
+
   class << self
     def call(transition)
-      post = transition.object
-
       ActiveRecord::Base.transaction do
-        post.update!(status: 'published', published_at: Time.now)
+        transition.target.update!(status: 'published', published_at: Time.now)
 
         # Pre-validate this to be able to rollback transaction
         transition.validate_result!
