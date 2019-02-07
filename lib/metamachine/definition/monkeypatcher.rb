@@ -2,8 +2,6 @@ module Metamachine
   module Definition
     # Adds methods to the original class
     class Monkeypatcher
-      HANDLE_METHOD = :handle_metamachine_event
-
       class << self
         def call(klass, event_name)
           klass.class_eval <<-RUBY, __FILE__, __LINE__ + 1
