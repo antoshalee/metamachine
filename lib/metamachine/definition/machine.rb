@@ -35,7 +35,7 @@ module Metamachine
 
       # DSL: runner definition
       def run(&block)
-        @runner = Metamachine::Runner.new(self, &block)
+        @runner = Metamachine::Runner.new(&block)
       end
 
       def build_transition(event, target, params)
@@ -53,6 +53,10 @@ module Metamachine
 
       def expected_state_for(event, state)
         events[event].transitions[state] || raise(InvalidTransitionInitialState)
+      end
+
+      def state_of(target)
+        target.send(state_reader)
       end
 
       private

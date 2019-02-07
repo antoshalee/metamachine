@@ -16,20 +16,16 @@ module Metamachine
       @target     = target
       @machine    = machine
       @params     = params
-      @state_from = current_target_state
+      @state_from = machine.state_of(target)
       @state_to   = machine.expected_state_for(event, state_from)
     end
 
     def validate_result!
-      raise NotExpectedResultState if current_target_state != state_to
+      raise NotExpectedResultState if machine.state_of(target) != state_to
     end
 
     private
 
     attr_reader :machine
-
-    def current_target_state
-      target.send(machine.state_reader).to_s
-    end
   end
 end
