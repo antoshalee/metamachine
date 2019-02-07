@@ -1,5 +1,7 @@
 require 'metamachine'
 
+Dir[File.dirname(__FILE__) + "/models/*.rb"].sort.each { |f| require File.expand_path(f) }
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -14,3 +16,4 @@ RSpec.configure do |config|
   config.order = :random
   config.disable_monkey_patching!
 end
+

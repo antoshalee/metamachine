@@ -42,6 +42,16 @@ RSpec.describe 'success' do
       .to('archived')
   end
 
+  it 'allows sequence of events' do
+    post = klass.new
+    post.status = 'draft'
+
+    expect do
+      post.publish
+      post.archive
+    end.not_to raise_error
+  end
+
   describe 'invalid state from' do
     it 'fails' do
       post = klass.new

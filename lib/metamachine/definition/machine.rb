@@ -35,7 +35,20 @@ module Metamachine
 
       # DSL: runner definition
       def run(&block)
-        @runner = Proc.new(&block)
+        @runner = Metamachine::Runner.new(self, &block)
+      end
+
+      def build_transition(event, target, params)
+        Metamachine::Transition.new(
+          machine: self,
+          event: event,
+          target: target,
+          params: params
+        )
+      end
+
+      def run_transition(transition)
+        runner.run(transition)
       end
 
       def expected_state_for(event, state)

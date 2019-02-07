@@ -43,12 +43,19 @@ class Post
     end
   end
 end
+
+post = Post.new
+post.publish
 ```
 
 This is how we execute a contract. You define `run` block and change a state explicitly inside.
 After block execution, new state will be validated, and exception will be raised if you did that improperly.
 
-You also able to pre-validate result by your own inside a block. This allows you to rollback transactions. Take a look on a more complex example below. Here we delegate transition execution to service objects.
+Please note you are not permitted to call other transitions on your object within `run` block. It throws `NestedTransitionsError`
+
+## Pre-validation
+
+You are able to pre-validate result by your own in the middle of `run` execution. This can be useful to rollback transactions. Take a look on a more complex example below. Here we delegate transition execution to service objects.
 
 ```ruby
 

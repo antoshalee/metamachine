@@ -15,14 +15,9 @@ module Metamachine
     def call
       machine = Metamachine::Definition.machines[target.class]
 
-      transition = Metamachine::Transition.new(
-        event: name,
-        machine: machine,
-        target: target,
-        params: params
-      )
+      transition = machine.build_transition(name, target, params)
 
-      machine.runner.call(transition)
+      machine.run_transition(transition)
 
       transition.validate_result!
     end
