@@ -14,8 +14,6 @@ module Metamachine
     private
 
     def avoid_nested_transitions_for(target)
-      raise Metamachine::NestedTransitionsError if active_transitions[target]
-
       lock_target(target)
 
       yield
@@ -24,7 +22,10 @@ module Metamachine
     end
 
     def lock_target(target)
-      active_transitions[target] = true
+      # `put_if_absent` returns value if key already exists
+      # In this happens we fail
+      active_transitions.put_if_absent(target, true) &&
+        (raise Metamachine::NestedTransitionsError)
     end
 
     def unlock_target(target)
