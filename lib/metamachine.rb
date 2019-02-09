@@ -15,8 +15,6 @@ module Metamachine
   NestedTransitionsError        = Class.new(StandardError)
 
   class << self
-    attr_reader :machines
-
     def included(base)
       base.extend Metamachine::DSL
 
