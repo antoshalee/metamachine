@@ -24,7 +24,7 @@ Our job is just a validation of initial state and making sure that you eventuall
 
 ```ruby
 class Post
-  include Metamachine
+  extend Metamachine::DSL
 
   metamachine(:status) do
     state :draft, :published

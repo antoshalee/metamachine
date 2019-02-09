@@ -13,12 +13,4 @@ module Metamachine
   InvalidTransitionInitialState = Class.new(StandardError)
   NotExpectedResultState        = Class.new(StandardError)
   NestedTransitionsError        = Class.new(StandardError)
-
-  class << self
-    def included(base)
-      base.extend Metamachine::DSL
-
-      super
-    end
-  end
 end

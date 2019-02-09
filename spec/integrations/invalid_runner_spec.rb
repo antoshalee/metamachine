@@ -3,7 +3,7 @@ RSpec.describe 'invalid runner' do
     Class.new do
       attr_accessor :status, :author
 
-      include Metamachine
+      extend Metamachine::DSL
 
       metamachine(:status) do
         state :draft, :published, :archived
