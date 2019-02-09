@@ -13,7 +13,7 @@ module Metamachine
     end
 
     def call
-      machine = Metamachine::Definition.machines[target.class]
+      machine = Metamachine::Registry.get(target.class)
 
       transition = machine.build_transition(name, target, params)
 

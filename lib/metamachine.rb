@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 module Metamachine
-  require_relative 'metamachine/definition'
+  require 'concurrent'
+  require_relative 'metamachine/machine'
+  require_relative 'metamachine/registry'
+  require_relative 'metamachine/dsl'
+  require_relative 'metamachine/monkeypatcher'
   require_relative 'metamachine/transition'
   require_relative 'metamachine/dispatch'
   require_relative 'metamachine/runner'
@@ -11,8 +15,10 @@ module Metamachine
   NestedTransitionsError        = Class.new(StandardError)
 
   class << self
+    attr_reader :machines
+
     def included(base)
-      base.extend Metamachine::Definition
+      base.extend Metamachine::DSL
 
       super
     end
