@@ -7,30 +7,10 @@ RSpec.describe Metamachine::DSL do
 
   let(:state_reader) { :my_awesome_status }
 
-  shared_examples 'machine build' do
-    it 'builds machine and adds it to registry' do
-      expect { subject }
-        .to change(Metamachine::Registry, :size)
-        .by(1)
-    end
-
-    it 'defines state reader' do
-      expect(subject.state_reader).to eq state_reader
-    end
-
-    context 'with wrong state reader type' do
-      let(:state_reader) { 1 }
-
-      it 'fails' do
-        expect { subject }.to raise_error(ArgumentError)
-      end
-    end
-  end
-
   describe '#metamachine' do
     subject { klass.metamachine(state_reader) }
 
-    include_examples 'machine build'
+    include_examples 'machine definition'
   end
 
   describe 'specific dsl methods' do
@@ -52,7 +32,7 @@ RSpec.describe Metamachine::DSL do
       describe '#call' do
         subject { node.call(state_reader) }
 
-        include_examples 'machine build'
+        include_examples 'machine definition'
       end
     end
 

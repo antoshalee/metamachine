@@ -1,6 +1,11 @@
 require 'metamachine'
 
-Dir[File.dirname(__FILE__) + "/models/*.rb"].sort.each { |f| require File.expand_path(f) }
+%w[
+  /models/*.rb
+  /support/**/*.rb
+].each do |path|
+  Dir[File.dirname(__FILE__) + path].each { |f| require f }
+end
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
