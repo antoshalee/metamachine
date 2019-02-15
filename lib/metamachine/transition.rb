@@ -10,14 +10,16 @@ module Metamachine
       event:,
       target:,
       machine:,
-      params:
+      params:,
+      state_from:,
+      state_to:
     )
       @event      = event.to_s
       @target     = target
       @machine    = machine
       @params     = params
-      @state_from = machine.state_of(target)
-      @state_to   = machine.expected_state_for(event, state_from)
+      @state_from = state_from
+      @state_to   = state_to
     end
 
     def validate_result!

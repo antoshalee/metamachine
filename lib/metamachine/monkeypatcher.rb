@@ -5,7 +5,8 @@ module Metamachine
       def call(klass, event_name)
         klass.class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{event_name}(params = {})
-            Metamachine::Dispatch.call(self, '#{event_name}', params)
+            machine = Metamachine::Registry[self.class]
+            machine.dispatch_event('#{event_name}', self, params)
 
             nil
           end

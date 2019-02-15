@@ -16,25 +16,50 @@ Our job is just a validation of initial state and making sure that you eventuall
 
 ## Setup
 
-1. Include `Metamachine` module into your class.
+1. You can define machine with `Metamachine.register` call
 2. Pass the state reader to `metamachine` call. We don't write a state but we definitely have to read it in order to validate it for you.
-3. Define states, events and transitions using DSL
-4. Implement your own runner. Inside `run` block you must change an object state.
+2. Define state_reader, states, events and transitions using DSL
+4. Implement your own runner which executes contract. Implement `run` block which changes an object state.
+
+```ruby
+
+Metamachine.register('post_machine') do
+  state_reader :status
+
+  state :draft, :published
+
+  event :publish do
+    transition from: :draft, to: :published
+  end
+
+  event :archive do
+    transition from: :published, to: :archived
+  end
+
+  # Minimal implementation to make transitions work
+  run do |transition|
+    transition.target.status = transition.state_to
+  end
+end
+
+post = Post.new(status: 'draft')
+
+Metamachine::Registry['post_machine'].run(post, :publish)
+```
+
+More convinient way would be to define dispatch method directly on your model class. Just extend it with `Metamachine::Mixin`.
 
 
 ```ruby
 class Post
-  extend Metamachine::DSL
+  extend Metamachine::Mixin
 
-  metamachine(:status) do
+  metamachine do
+    state_reader :status
     state :draft, :published
 
     event :publish do
       transition from: :draft, to: :published
-    end
-
-    event :archive do
-      transition from: :published, to: :archived
     end
 
     # Minimal implementation to make transitions work

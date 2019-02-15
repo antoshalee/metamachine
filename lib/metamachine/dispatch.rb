@@ -6,26 +6,61 @@ module Metamachine
       end
     end
 
-    def initialize(target, name, params)
-      @target = target
-      @name   = name
-      @params = params
+    def initialize(machine, event, target, params)
+      @machine = machine
+      @event   = event
+      @target  = target
+      @params  = params
     end
 
     def call
-      machine = Metamachine::Registry.get(target.class)
+      @state_from = current_state
+      @state_to = machine.calculate_state_to(state_from, event)
 
-      transition = machine.build_transition(name, target, params)
-
-      machine.run_transition(transition)
-
-      transition.validate_result!
+      with_contract do
+        machine.run_transition(build_transition)
+      end
     end
 
     private
 
-    attr_reader :target,
-                :name,
-                :params
+    attr_reader :machine,
+                :target,
+                :event,
+                :params,
+                :state_from,
+                :state_to
+
+    def with_contract
+      validate_transition_possibility!
+
+      yield
+
+      validate_state_to!
+    end
+
+    def validate_transition_possibility!
+      # Transition is impossible if we don't detect result state
+      raise InvalidTransitionInitialState if state_to.nil?
+    end
+
+    def validate_state_to!
+      raise NotExpectedResultState if current_state != state_to
+    end
+
+    def current_state
+      target.send(machine.state_reader)
+    end
+
+    def build_transition
+      Metamachine::Transition.new(
+        machine: machine,
+        event: event,
+        target: target,
+        params: params,
+        state_from: state_from,
+        state_to: state_to
+      )
+    end
   end
 end

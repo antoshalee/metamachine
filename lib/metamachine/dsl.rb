@@ -1,114 +1,62 @@
 # frozen_string_literal: true
 
 module Metamachine
-  # Extend your class with this module in order to
-  # allow metamachine DSL:
-  #
-  #   class YourClass
-  #     extend Metamachine::DSL
-  #
-  #     metamachine do
-  #       ..
-  #     end
-  #  end
+  # Machine definition
   module DSL
-    # Base class for all DSL nodes
-    # Node reflects method execution and it's class name reflects a chain:
-    #
-    # E.g. `Metamachine::Event::Transition` is a class for a DSL node
-    # which actually executes `metamachine.event.transition` chain
-    class Base
-      attr_reader :context,
-                  :machine
-
-      # context is a parent node except for the root `Metamachine` node
-      # for which context is a host class
-      def initialize(context, machine = nil)
-        @context = context
-        @machine = machine
-      end
-
-      def method_missing(method, *args, &block)
-        klass = child_node_class(method)
-
-        return super unless klass
-
-        klass.new(self, machine).call(*args, &block)
-      end
-
-      def respond_to_missing?(method_name, _)
-        !child_node_class(method_name).nil? || super
-      end
-
-      private
-
-      KNOWN_NODES = {
-        'state_reader' => 'StateReader',
-        'state'        => 'State',
-        'event'        => 'Event',
-        'transition'   => 'Transition',
-        'run'          => 'Run'
-      }.freeze
-
-      def child_node_class(name)
-        Object.const_get("#{self.class}::#{KNOWN_NODES[name.to_s]}")
-      rescue NameError
-        nil
-      end
-    end
+    require_relative 'dsl/node'
 
     # rubocop:disable Style/Documentation
-    class Metamachine < Base
+    # rubocop:disable Style/ClassAndModuleChildren
+    # rubocop:disable Naming/ClassAndModuleCamelCase
+    class Root < Node
       def call(&block)
-        ::Metamachine::Machine.new(context).tap do |m|
-          @machine = m
-          @machine.register!
-
-          instance_eval(&block) if block_given?
-        end
+        instance_eval(&block) if block_given?
       end
+    end
 
-      class StateReader < Base
-        def call(reader)
-          machine.state_reader = reader
+    class Root::Node_state_reader < Node
+      def call(reader)
+        unless reader.is_a?(Symbol) || reader.is_a?(String)
+          raise ArgumentError, 'State reader must be a String or a Symbol'
         end
+
+        machine.instance_variable_set(:@state_reader, reader)
       end
+    end
 
-      class State < Base
-        def call(*states)
-          machine.states.concat states.map(&:to_s)
-        end
+    class Root::Node_state < Node
+      def call(*states)
+        machine.states.concat states.map(&:to_s)
       end
+    end
 
-      class Event < Base
-        attr_reader :name
+    class Root::Node_event < Node
+      attr_reader :event_name
 
-        def call(name, &block)
-          @name = name.to_s
+      def call(name, &block)
+        @event_name = name.to_s
 
-          machine.register_event(@name)
+        machine.events[event_name] = {}
 
-          instance_eval(&block) if block_given?
-        end
-
-        class Transition < Base
-          def call(from:, to:)
-            machine.register_transition(context.name, from, to)
-          end
-        end
+        instance_eval(&block) if block_given?
       end
+    end
 
-      class Run < Base
-        def call(&block)
-          machine.register_runner(&block)
+    class Root::Node_event::Node_transition < Node
+      def call(from:, to:)
+        Array(from).each do |f|
+          machine.events[parent.event_name][f.to_s] = to.to_s
         end
       end
     end
-    # rubocop:enable Style/Documentation
 
-    # Root method
-    def metamachine(&block)
-      DSL::Metamachine.new(self).call(&block)
+    class Root::Node_run < Node
+      def call(&block)
+        machine.instance_variable_set(
+          :@runner,
+          Metamachine::Runner.new(&block)
+        )
+      end
     end
   end
 end
