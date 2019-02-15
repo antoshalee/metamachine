@@ -5,10 +5,8 @@ RSpec.describe Metamachine::DSL do
     end
   end
 
-  let(:state_reader) { :my_awesome_status }
-
   describe '#metamachine' do
-    subject { klass.metamachine(state_reader) }
+    subject { klass.metamachine }
 
     include_examples 'machine definition'
   end
@@ -17,7 +15,7 @@ RSpec.describe Metamachine::DSL do
     subject { node }
 
     let(:node) { described_class.new(context, machine) }
-    let(:machine) { Metamachine::Machine.new(klass, state_reader) }
+    let(:machine) { Metamachine::Machine.new(klass) }
     let(:context) { nil }
 
     describe Metamachine::DSL::Metamachine do
@@ -30,9 +28,22 @@ RSpec.describe Metamachine::DSL do
       it { is_expected.not_to respond_to :transition }
 
       describe '#call' do
-        subject { node.call(state_reader) }
+        subject { node.call }
 
         include_examples 'machine definition'
+      end
+    end
+
+    describe Metamachine::DSL::Metamachine::StateReader do
+      describe '#call' do
+        subject { node.call(:status_attr) }
+
+        it 'defines state reader and stringifies it' do
+          expect { subject }
+            .to change(machine, :state_reader)
+            .from(nil)
+            .to('status_attr')
+        end
       end
     end
 

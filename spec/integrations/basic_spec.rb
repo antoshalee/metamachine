@@ -5,7 +5,9 @@ RSpec.describe 'success' do
 
       extend Metamachine::DSL
 
-      metamachine(:status) do
+      metamachine do
+        state_reader :status
+
         state :draft, :published, :archived
 
         event :publish do

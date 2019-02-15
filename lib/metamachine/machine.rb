@@ -1,26 +1,27 @@
 module Metamachine
   class Machine
-    attr_accessor :state_reader
-
     attr_reader :target_class,
+                :state_reader,
                 :states,
                 :events,
                 :runner
 
-    def initialize(target_class, state_reader)
+    def initialize(target_class)
       @target_class = target_class
-
-      if !state_reader.is_a?(Symbol) && !state_reader.is_a?(String)
-        raise ArgumentError, 'state reader must be a String or a Symbol'
-      end
-
-      @state_reader = state_reader
       @states = []
       @events = {}
     end
 
     def register!
       Metamachine::Registry.add(self)
+    end
+
+    def state_reader=(val)
+      if !val.is_a?(Symbol) && !val.is_a?(String)
+        raise ArgumentError, 'state reader must be a String or a Symbol'
+      end
+
+      @state_reader = val.to_s
     end
 
     def build_transition(event, target, params)

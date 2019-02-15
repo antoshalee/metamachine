@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Metamachine
   # Extend your class with this module in order to
   # allow metamachine DSL:
@@ -40,8 +42,16 @@ module Metamachine
 
       private
 
+      KNOWN_NODES = {
+        'state_reader' => 'StateReader',
+        'state'        => 'State',
+        'event'        => 'Event',
+        'transition'   => 'Transition',
+        'run'          => 'Run'
+      }.freeze
+
       def child_node_class(name)
-        Object.const_get("#{self.class}::#{name.to_s.capitalize}")
+        Object.const_get("#{self.class}::#{KNOWN_NODES[name.to_s]}")
       rescue NameError
         nil
       end
@@ -49,12 +59,18 @@ module Metamachine
 
     # rubocop:disable Style/Documentation
     class Metamachine < Base
-      def call(state_reader, &block)
-        ::Metamachine::Machine.new(context, state_reader).tap do |m|
+      def call(&block)
+        ::Metamachine::Machine.new(context).tap do |m|
           @machine = m
           @machine.register!
 
           instance_eval(&block) if block_given?
+        end
+      end
+
+      class StateReader < Base
+        def call(reader)
+          machine.state_reader = reader
         end
       end
 
@@ -91,8 +107,8 @@ module Metamachine
     # rubocop:enable Style/Documentation
 
     # Root method
-    def metamachine(state_reader, &block)
-      DSL::Metamachine.new(self).call(state_reader, &block)
+    def metamachine(&block)
+      DSL::Metamachine.new(self).call(&block)
     end
   end
 end
