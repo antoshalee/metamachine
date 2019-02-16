@@ -21,10 +21,7 @@ module Metamachine
         Object
           .const_get("#{self.class}::Node_#{method}")
           .new(context, self)
-          .tap do |node|
-
-          node.call(*args, &block)
-        end
+          .call(*args, &block)
       end
 
       def machine
