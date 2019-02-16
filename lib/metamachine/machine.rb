@@ -2,12 +2,12 @@ module Metamachine
   class Machine
     attr_reader :state_reader,
                 :states,
-                :events,
+                :transitions_map,
                 :runner
 
     def initialize(&dsl)
       @states = []
-      @events = {}
+      @transitions_map = {}
 
       DSL::Root.new(machine: self).call(&dsl)
     end
@@ -20,8 +20,8 @@ module Metamachine
       runner.run(transition)
     end
 
-    def calculate_state_to(state_from, event)
-      events[event][state_from]
+    def calculate_state_to(state_from, event_name)
+      transitions_map[event_name][state_from]
     end
 
     private

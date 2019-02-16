@@ -24,7 +24,7 @@ module Metamachine
       end
     end
 
-    class Root::Node_state < Node
+    class Root::Node_states < Node
       def call(*states)
         machine.states.concat states.map(&:to_s)
       end
@@ -36,7 +36,7 @@ module Metamachine
       def call(name, &block)
         @event_name = name.to_s
 
-        machine.events[event_name] = {}
+        machine.transitions_map[event_name] = {}
 
         instance_eval(&block) if block_given?
       end
@@ -45,7 +45,7 @@ module Metamachine
     class Root::Node_event::Node_transition < Node
       def call(from:, to:)
         Array(from).each do |f|
-          machine.events[parent.event_name][f.to_s] = to.to_s
+          machine.transitions_map[parent.event_name][f.to_s] = to.to_s
         end
       end
     end

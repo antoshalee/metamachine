@@ -12,13 +12,13 @@ module Metamachine
   #     end
   #  end
   module Mixin
-    def metamachine(&block)
+    def metamachine(&dsl)
       machine = Metamachine.register(
         self,
-        &block
+        &dsl
       )
 
-      machine.events.each_key do |event_name|
+      machine.transitions_map.each_key do |event_name|
         Monkeypatcher.call(self, event_name)
       end
     end

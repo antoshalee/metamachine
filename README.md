@@ -26,7 +26,7 @@ Our job is just a validation of initial state and making sure that you eventuall
 Metamachine.register('post_machine') do
   state_reader :status
 
-  state :draft, :published
+  states :draft, :published
 
   event :publish do
     transition from: :draft, to: :published
@@ -56,7 +56,7 @@ class Post
 
   metamachine do
     state_reader :status
-    state :draft, :published
+    states :draft, :published
 
     event :publish do
       transition from: :draft, to: :published

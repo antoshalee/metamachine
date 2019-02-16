@@ -7,7 +7,7 @@ RSpec.describe 'success' do
 
       metamachine do
         state_reader :status
-        state :draft, :published, :archived
+        states :draft, :published, :archived
 
         event :publish do
           transition from: :draft, to: :published
