@@ -29,8 +29,9 @@ RSpec.describe 'success' do
     end
   end
 
+  let(:post) { klass.new }
+
   it 'works' do
-    post = klass.new
     post.status = 'draft'
 
     expect { post.publish(author: 'Harms') }
@@ -45,7 +46,6 @@ RSpec.describe 'success' do
   end
 
   it 'allows sequence of events' do
-    post = klass.new
     post.status = 'draft'
 
     expect do
@@ -54,9 +54,14 @@ RSpec.describe 'success' do
     end.not_to raise_error
   end
 
+  specify 'event call returns transition object' do
+    post.status = 'draft'
+
+    expect(post.publish).to be_a(Metamachine::Transition)
+  end
+
   describe 'invalid state from' do
     it 'fails' do
-      post = klass.new
       post.status = 'archived'
 
       expect { post.publish }

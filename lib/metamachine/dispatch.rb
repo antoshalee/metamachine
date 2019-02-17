@@ -17,8 +17,10 @@ module Metamachine
       @state_from = current_state
       @state_to = machine.calculate_state_to(state_from, event)
 
-      with_contract do
-        machine.run_transition(build_transition)
+      build_transition.tap do |transition|
+        with_contract do
+          machine.run_transition(transition)
+        end
       end
     end
 

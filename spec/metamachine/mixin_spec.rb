@@ -27,5 +27,3 @@ RSpec.describe Metamachine::Mixin do
     end
   end
 end
-
-

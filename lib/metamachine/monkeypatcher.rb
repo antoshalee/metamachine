@@ -7,8 +7,6 @@ module Metamachine
           def #{event_name}(params = {})
             machine = Metamachine::Registry[self.class]
             machine.dispatch_event('#{event_name}', self, params)
-
-            nil
           end
         RUBY
       end
