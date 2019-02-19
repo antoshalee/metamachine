@@ -78,42 +78,24 @@ After block execution, new state will be validated, and exception will be raised
 
 Please note you are not permitted to call other transitions on your object within `run` block. It throws `NestedTransitionsError`
 
-## Pre-validation
+## Explicit contract call
 
-You are able to pre-validate result by your own in the middle of `run` execution. This can be useful to rollback transactions. Take a look on a more complex example below. Here we delegate transition execution to service objects.
+You are able to access `Contract` instance and run it on any object including the original target.
+Note that metamachine do it implicitly for you and wraps `run` by contract.
+But you also allowed to run it explicitly at any point of `run` execution. This operation is safe since it doesn't mutate anything but just validates precondition(initial status) and postcondition(result status).
+This can be useful if you want to force exceptions to be raised in order to rollback database transaction.
 
 ```ruby
 
-# Define runner
 run do |transition, object|
-  "Transitions::#{transition.event.camelize}".constantize.call(transition)
-end
-
-# Implementation of specific transition
-class Transitions::Publish do
-  def initialize(transition)
-    @transition = transition
-  end
-
-  class << self
-    def call(transition)
-      ActiveRecord::Base.transaction do
-        transition.target.update!(status: 'published', published_at: Time.now)
-
-        # Pre-validate this to be able to rollback transaction
-        transition.validate_result!
-
-        do_other_stuff_within_transaction
-      end
-
-      send_email_to event.params[:author]
-      and_do_a_lot_of_other_stuff
+  ActiveRecord::Base.transaction do
+    transition.contract.call!(object) do
+      object.update!(status: transition.state_to)
     end
+
+    write_log
   end
 end
-
-# we are able to run event with hash parameters
-post.request(author: user)
 
 ```
 

@@ -1,4 +1,4 @@
-RSpec.describe 'nested transitions' do
+RSpec.describe 'success' do
   let(:klass) do
     Class.new do
       attr_accessor :status, :author
@@ -7,28 +7,31 @@ RSpec.describe 'nested transitions' do
 
       metamachine do
         state_reader :status
+
         states :draft, :published, :archived
 
         event :publish do
           transition from: :draft, to: :published
         end
 
-        event :archive do
-          transition from: :draft, to: :archived
-        end
-
         run do |transition|
-          transition.target.archive
+          begin
+            transition.contract!(transition.target) do
+              transition.target.status = nil
+            end
+          rescue Metamachine::Contract::PostconditionsError
+            raise 'custom postconditions error'
+          end
         end
       end
     end
   end
 
-  it 'avoids recursion' do
+  it 'works' do
     post = klass.new
     post.status = 'draft'
 
     expect { post.publish }
-      .to raise_error(Metamachine::Runner::NestedTransitionError)
+      .to raise_error(RuntimeError, 'custom postconditions error')
   end
 end

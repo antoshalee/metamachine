@@ -13,7 +13,7 @@ module Metamachine
     end
 
     def dispatch_event(name, obj, params)
-      Metamachine::Dispatch.call(self, name, obj, params)
+      Metamachine::Dispatch.new(self, name, obj, params).call
     end
 
     def run_transition(transition)
@@ -22,18 +22,6 @@ module Metamachine
 
     def calculate_state_to(state_from, event_name)
       transitions_map[event_name][state_from]
-    end
-
-    private
-
-    def validate_event_transitions(evt)
-      unknown_states =
-        (evt.transitions.keys + evt.transitions.values).uniq - states
-
-      return if unknown_states.empty?
-
-      raise Definition::UnknownState,
-            "Uknown state: #{unknown_states.join(', ')}. Define them in advance of events"
     end
   end
 end

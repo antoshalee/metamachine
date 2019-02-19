@@ -23,6 +23,7 @@ RSpec.describe 'invalid runner' do
     post = klass.new
     post.status = 'draft'
 
-    expect { post.publish }.to raise_error(Metamachine::NotExpectedResultState)
+    expect { post.publish }
+      .to raise_error(Metamachine::Assertion::Error)
   end
 end

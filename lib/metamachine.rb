@@ -24,10 +24,9 @@ module Metamachine
   require_relative 'metamachine/transition'
   require_relative 'metamachine/dispatch'
   require_relative 'metamachine/runner'
+  require_relative 'metamachine/state_contract'
 
   InvalidTransitionInitialState = Class.new(StandardError)
-  NotExpectedResultState        = Class.new(StandardError)
-  NestedTransitionsError        = Class.new(StandardError)
 
   class << self
     def register(key, &dsl)

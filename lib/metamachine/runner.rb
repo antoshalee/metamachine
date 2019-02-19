@@ -1,5 +1,7 @@
 module Metamachine
   class Runner
+    NestedTransitionError = Class.new(StandardError)
+
     def initialize(&block)
       @run_block = Proc.new(&block)
       @running_transitions = Concurrent::Map.new
@@ -24,8 +26,8 @@ module Metamachine
     def lock_target(target)
       # `put_if_absent` returns value if key already exists
       # In this happens we fail
-      running_transitions.put_if_absent(target, true) &&
-        (raise Metamachine::NestedTransitionsError)
+      raise NestedTransitionError if
+        running_transitions.put_if_absent(target, true)
     end
 
     def unlock_target(target)
