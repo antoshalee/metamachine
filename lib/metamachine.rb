@@ -16,6 +16,7 @@
 #   end
 module Metamachine
   require 'concurrent'
+  require 'def_initialize'
   require_relative 'metamachine/machine'
   require_relative 'metamachine/registry'
   require_relative 'metamachine/mixin'

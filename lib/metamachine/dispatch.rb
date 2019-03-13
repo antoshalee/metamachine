@@ -3,12 +3,7 @@ module Metamachine
   # Builds transition and contract
   # Runs transition runner in the context of contract
   class Dispatch
-    def initialize(machine, event_name, target, params)
-      @machine    = machine
-      @event_name = event_name
-      @target     = target
-      @params     = params
-    end
+    include DefInitialize.with('machine, event_name, target, params')
 
     def call
       build_transition.tap do |transition|
@@ -19,11 +14,6 @@ module Metamachine
     end
 
     private
-
-    attr_reader :machine,
-                :target,
-                :event_name,
-                :params
 
     def build_transition
       Transition.new(

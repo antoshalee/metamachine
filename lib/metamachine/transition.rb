@@ -3,27 +3,14 @@ module Metamachine
   # target, event params and contract
   # Specific transition will be passed to the runner call as a parameter
   class Transition
-    attr_reader :event_name,
-                :target,
-                :params
+    include DefInitialize.with('event_name:, target:, params: {}, contract:',
+                               readers: :public)
 
     extend Forwardable
 
     def_delegators :@contract,
                    :state_from,
                    :state_to
-
-    def initialize(
-      event_name:,
-      target:,
-      params: {},
-      contract:
-    )
-      @event_name = event_name.to_s
-      @target     = target
-      @params     = params
-      @contract   = contract
-    end
 
     # Metamachine wraps runner by contract call
     # but it also provides this method

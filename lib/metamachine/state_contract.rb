@@ -12,11 +12,7 @@ module Metamachine
 
     include Assertion
 
-    def initialize(state_from:, state_to:, state_reader:)
-      @state_from   = state_from
-      @state_to     = state_to
-      @state_reader = state_reader
-    end
+    include DefInitialize.with('state_from:, state_to:, state_reader:')
 
     def call(target)
       assert_value! target.send(state_reader), state_from, 'initial state'
@@ -25,11 +21,5 @@ module Metamachine
 
       assert_value! target.send(state_reader), state_to, 'result state'
     end
-
-    private
-
-    attr_reader :state_from,
-                :state_to,
-                :state_reader
   end
 end
