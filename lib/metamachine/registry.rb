@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require 'forwardable'
+
 module Metamachine
   # Registry of all defined machines
   class Registry

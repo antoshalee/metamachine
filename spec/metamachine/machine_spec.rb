@@ -8,13 +8,14 @@ RSpec.describe Metamachine::Machine do
     let(:post) { TestPost.new }
     let(:params) { {} }
 
-    it 'delegates call to Dispatcher' do
-      allow(Metamachine::Dispatch).to receive(:call)
+    it 'delegates call to Dispatch' do
+      dispatcher = double(call: nil)
+
+      allow(Metamachine::Dispatch).to receive(:new).with(machine, event, post, params).and_return(dispatcher)
 
       subject
 
-      expect(Metamachine::Dispatch)
-        .to have_received(:call).with(machine, event, post, params)
+      expect(dispatcher).to have_received(:call)
     end
   end
 end

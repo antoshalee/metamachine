@@ -17,7 +17,7 @@ RSpec.describe Metamachine::Runner do
 
       it 'fails' do
         expect { runner.run(transition) }
-          .to raise_error(Metamachine::NestedTransitionsError)
+          .to raise_error(Metamachine::Runner::NestedTransitionError)
       end
     end
   end
